@@ -1,7 +1,7 @@
 # WHO IS WOLFIE?
 
 **Captain WOLFIE** (Eric Robin Gerdes)  
-**The Solo Programmer Behind WOLFIE**  
+**The Solo Programmer Behind LUPOPEDIA**  
 
 ---
 
@@ -1008,4 +1008,5 @@ Expect innovation. Expect quality. Expect it to work everywhere.
 - Security innovator (SQL injection prevention, session security, fingerprinting system)
 - City and County of Honolulu CRM (adopted by Maui County)
 - Hawaii Activity World CRM (acquired by Expedia Fun)
+
 
