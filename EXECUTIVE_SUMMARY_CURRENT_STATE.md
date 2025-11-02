@@ -1,0 +1,754 @@
+### 2025-10-30 Update
+
+- Unified schema cleanup completed:
+  - Dropped: `religions`, `content_books`, `content_context`; removed dependent views.
+  - Codebase refactored to use `content` with `content_type='religion'`.
+  - Introduced `religion_content_id` columns with safe FKs (ON DELETE SET NULL).
+- User/Agent normalization:
+  - `id=1` set to Unknown, `id=7` is Captain (admin).
+  - Core agent renamed: `ARA` → `AGAPE` (Agent Governance And Protocol Enforcement).
+- Seeds prepared: users/agents, chat summaries, baseline rest; exports created: `default_scheme_wolfe.sql`, `what_we_have_now.sql`.
+  - See `DATABASE.md` → Seeding Coverage for grouped default seeds required on fresh installs.
+
+# WOLFIE: Executive Summary
+
+Date: 2025-11-01
+Version: 0.0.5 (Development) - Latest Release: 0.0.4 (2025-11-01)
+Status: Post-release development - v0.0.4 packaged and released
+
+## Overview of WOLFIE
+**WOLFIE (Web Ontology Library Framework Intelligent Explorer)** is a **domain-agnostic, open-source platform** for organizing **any type of knowledge** into a structured, explorable ontology. It uses a **single unified `content` table** to store heterogeneous data (books, files, resources, etc.), tagged with **hierarchical Q/A questions** (WHO, WHAT, WHERE, WHEN, WHY, HOW, DO/HACK/OTHER). These tags create **dynamic, context-aware collections** for navigation, filtered by **channels** using a **BASE + DELTA model** (Channel 1 = base collections; other channels add/remove/modify based on context and dimension). The system is **contextually and dimensionally aware**—the same content reveals different collections per channel (e.g., "programming" means code in Tech channel, broadcast schedules in Media channel). It's built on **PHP + MySQL**, supports **multi-AI agent coordination** for chat/review/approval, and enables **decentralized discovery** via public beacon endpoints—allowing independent installations to form a networked ecosystem without a central authority.
+
+**Historical Evolution**: WOLFIE evolved from "Wisdom of Loving Faith," originally designed as a religious research site. The system's generic architecture allowed it to be repurposed into a general-purpose ontology framework, rebranded as WOLFIE. The platform's original design philosophy remains intact: domain-agnostic, ontology-driven, and channel-aware exploration.
+
+**Current Installations**:
+- **lupopedia.com**: Main WOLFIE platform - downloads, documentation, community hub, generic ontology framework (Official platform website)
+- **wisdomoflovingfaith.com**: Religious installation - interfaith spiritual content, 22+ religions, comparative analysis (Example installation)
+- **superpositionally.com**: R&D and innovation lab - superpositionally headers development, experimental features (Development beacon)
+
+**Current Maturity (as of 2025-11-01)**: **Version 0.0.5** (Development), **Latest Release: 0.0.4** (Released 2025-11-01). **Core features work now** (unified storage, tagging, collections, AI chat with `said_to` routing, contextual Q/A, REST APIs, mobile interface). **v0.0.4 includes complete mobile interface** (Search, Content, Agents, Profile). Proven at small scale (~100 users, 152 DB objects); large-scale claims pending load tests.
+
+### Database and Portability
+- Current database: **MySQL** (PDO). **152 tables** (down from 165), **0 views** (all dropped for stability), **103 capacity remaining** toward 255-table limit.
+- Code paths written with OOP-style connection/query abstractions so the storage engine can be swapped (e.g., PostgreSQL, SQLite) with minimal surface-area changes.
+- Design intent: Treat the SQL store as the canonical source now, but avoid hard-coupling the application logic to MySQL-specific features where not required.
+- Collections-first: Downstream systems ultimately consume **collections as JSON**; persistence backends can evolve without breaking the UX contract.
+
+### Vectorization Roadmap
+- Background task/agent can incrementally build a **vector index** from the SQL source of truth (respecting channels and Q/A hierarchies), using the curated UI flows to capture human-approved structure.
+- Pipeline concept: `content` + `content_questions` + `content_headers` → normalized passages with metadata → embedding → vector DB (e.g., FAISS, pgvector, SQLite+VSS).
+- Goal: Maintain SQL as the authoritative model while enabling **semantic retrieval** for agents and advanced search.
+- Status: Planned; not required for core functionality today.
+
+### Primary Uses (What You Can Do Right Now)
+WOLFIE excels at **turning raw content into navigable knowledge graphs**. Here's a breakdown of **real-world applications**:
+
+| Use Case | Description | Example Hierarchy (Q/A Tags) | Why It Fits WOLFIE |
+|----------|-------------|------------------------------|--------------------|
+| **Knowledge Bases / Documentation** | Store & tag docs, SOPs, APIs; auto-generate collections for quick lookup. | Project → Module → Function | Unified table + tags simplify schema; channels filter by team/role. |
+| **Education Platforms** | Organize courses, lessons, resources; create shareable "briefing packs". | Subject → Grade → Topic → Resource | Hierarchical tags build drill-down views; saved collections as lesson plans. |
+| **Research Repositories** | Tag papers, methods, findings; link internal/external sources. | Field → Methodology → Finding | Dynamic collections from tag children; AI agents for review/summaries. |
+| **Religious/Spiritual Study** (wisdomoflovingfaith.com) | Comparative faith content (verses, prayers, songs). | Religion → Denomination → Book → Verse | Proven: 22 religions tagged; interfaith chat via agents. |
+| **Platform Development** (superpositionally.com) | Development beacon and community hub for WOLFIE itself. | Platform → Development → Community → Resources | Development docs, how-to guides, community resources, beacon endpoint. |
+| **Medical/Healthcare** | Clinical trials, guidelines, patient info. | Condition → Treatment → Evidence | Context filtering (e.g., specialty channel); probability-based updates keep fresh. |
+| **Legal Platforms** | Statutes, cases, regs. | Area → Jurisdiction → Case Type | External links in collections; agent approval for accuracy. |
+| **Corporate KM** | Processes, training, policies. | Dept → Process → Resource | User collections as shareable playlists; beacons for enterprise federation. |
+
+**Key Enablers**:
+- **Tag a piece of content** (e.g., "Christianity" as WHAT=denomination) → **Auto-generates collections** for its children (books, prayers) via `content_headers`.
+- **Save/share collections** as JSON payloads for colleagues/AIs.
+- **Chat with 20+ agents** (e.g., AGAPE for enforcement, WOLFIE for ethics) in dual-mode for debates.
+- **Search/browse** via full-text index; track recently viewed.
+
+### Implications (Broader Impact & Considerations)
+WOLFIE isn't just a CMS—it's an **ontology engine** that **forces structured thinking** (Q/A hierarchies) while staying **flexible**.
+
+#### Positive Implications
+1. **Democratizes Knowledge Organization**
+   - **Anyone installs it** (import SQL schema, tweak config) → **Custom ontology in hours**.
+   - **Decentralized network**: Beacons let Google index your instance; others query/discover via API. **Could spawn 1,000s of specialized hubs**.
+2. **AI-Augmented Curation**
+   - **Agents handle grunt work**: Auto-review (`wolfie_approved`), probabilistic updates (5% chance per load—no cron spikes).
+   - **"Teach" AIs**: Feed saved collections to agents for domain-specific responses.
+3. **Scalable Foundation** (With Caveats)
+   - **Proven pattern**: Builds on Crafty Syntax lineage; adapted for this stack.
+   - **Easy extensibility**: Add `content_type`s; JSON metadata for schemaless data.
+4. **Revolutionary for Learning/Research**
+   - **Q/A as "living tags"**: Turns answers into **pivots** (e.g., click WHO=person → their books collection).
+   - **Channel magic**: "Programming" means code (Tech channel) or TV schedules (Media).
+
+#### Risks & Limitations (Honest Assessment)
+| Aspect | Implication | Mitigation |
+|--------|-------------|------------|
+| **Early Stage** | Recommendations **not built**; UI basic (PHP pages). | Focus on **working core**; fork/customize. |
+| **Scale** | Small-scale only; no 1M-user proof yet. | Load test before prod; MySQL limits concurrency. |
+| **Tech Stack** | PHP/MySQL: simple to deploy, but perf ceilings at scale. | Consider Postgres/Laravel later. |
+| **Decentralization** | Privacy/governance per instance; no federation yet. | Local rules + HTTP APIs = secure sharing. |
+| **Maintenance** | Probability updates are opportunistic. | Fine for low-traffic; add cron for high-volume. |
+
+#### Future Implications (Roadmap Realized)
+- **Phase 4-6**: Context engines + smart recs → **AGI-like exploration**.
+- **Ecosystem Boom**: Network effects via beacons → **federated, ontology-driven web**.
+- **Monetization**: Host specialized instances; share ontologies.
+- **Open-Source Flywheel**: Generic design → rapid adoption; community `sot_*` seeds.
+
+### Recommendation: Get Started
+1. **Test It**: Import `default_scheme_wolfe.sql` on a LAMP stack; load seeds.
+2. **Your First Use**: Tag 10 items → build a collection → try agent chat.
+3. **Extend**: Add a `content_type`; define a custom `sot_*` hierarchy.
+
+**Bottom Line**: WOLFIE **transforms chaos into explorable wisdom**—**perfect for solo researchers, teams, or networks**. It's **generic power in a tiny package**, limited only by its youth. **Install today; the ontology revolution starts local.**
+
+## 1) Architecture Overview
+
+- Web stack: PHP + MySQL; UI pages for browse/search/chat/collections
+- Unified storage: `content` table with `content_type` discriminator
+- Hierarchical Q/A tags: `sot_*` tables with `parent_id`, `qa_identifier`, `sort_order`
+- Linking layer: `content_questions` (content ↔ Q/A tags), `content_headers` (collections)
+- Search layer: `search_index` for fast lookups
+- Agent layer: multiple AI agents with approval workflow
+
+---
+
+## 1.5) AI Agent Integration (Multi-Agent Collaboration)
+
+WOLFIE implements a **collaborative multi-agent system** where users can interact with multiple AI agents simultaneously, leveraging each agent's unique strengths:
+
+### Collaboration Model (Channel-Based with `saidto` Field)
+WOLFIE uses **channels** and the **`saidto` field** (from Crafty Syntax architecture) to control message visibility and prevent AI "parrot effect":
+
+- **Channel-based conversations**: All participants (user + multiple agents) are on the same channel (like a chat room).
+- **User message routing**: When a user types and sends a message, they select ONE agent via tabs; the message is sent with `saidto = agent_id`, meaning **only that selected agent sees it** (not other agents).
+- **Agent replies**: When an agent replies, the reply is sent with `saidto = user_id` (user sees it) AND a copy is sent to Agent 2 (CLAUDE) with `saidto = 2` for compilation.
+- **Message visibility**:
+  - **User sees ALL messages**: The UI displays all agent replies in one unified chat window (filtered by `said_to = 0 OR said_to = user_id`).
+  - **Agents see ONLY messages addressed to them**: Each agent's query is filtered by `said_to = 0 OR said_to = agent_id`, so they only see user messages (broadcast) or messages specifically sent to them.
+  - **Prevents parrot effect**: Agents do NOT see each other's replies, preventing AI agents from responding to each other and creating infinite loops.
+
+### Inter-Agent Communication Agent (Agent ID 2: CLAUDE)
+**CLAUDE** (Coordinator, Liaison, Analyst, Unifier, Distributor, Executor) is the **inter-agent communication agent** that:
+
+- **Receives all agent replies**: When agents reply to users, copies are sent to CLAUDE with `saidto = 2`, giving CLAUDE visibility into all agent responses.
+- **Compiles the full conversation**: CLAUDE sees the entire conversation context (user messages + all agent replies) and synthesizes diverse perspectives.
+- **Creates unified implementation plans**: From the compiled responses, CLAUDE generates well-devised plans that integrate all agent insights into actionable steps.
+- **Left navigation display**: The UI's left sidebar shows **Plans** and **Implementations** sections, displaying:
+  - How plans are made (from agent responses compiled by CLAUDE).
+  - Implementation status (execution progress of CLAUDE-generated plans).
+- **Task generation**: Tasks can be automatically created based on:
+  - User requests made in the UI for **curating collections**.
+  - Requests for **maintaining the website** (content updates, schema changes, etc.).
+  - Agent-recommended actions from conversation analysis.
+
+### Current Status
+- **UI mockup**: Implemented in `CHAT_CHANNELS_MOCKUP2.htm` showing multi-agent chat interface, agent tabs, and message routing.
+- **Architecture**: Based on proven Crafty Syntax channel and `saidto` system (battle-tested at 1+ million installations).
+- **Backend integration**: Agent coordination logic (Agent ID 2 compilation, plan generation) is in active development.
+
+---
+
+## 2) Data Model (Core)
+
+- `content`: all items (books, songs, resources, codex_books, etc.) in one table
+- `sot_who`, `sot_what`, `sot_where`, `sot_when`, `sot_why`, `sot_how`, `sot_hacks`, `sot_other`: hierarchical Q/A nodes
+- `content_questions`: many-to-many map between content and Q/A nodes; context/channel aware
+- `content_headers`: collection metadata pointing to Q/A children (by `sot_type`, `sot_id`)
+- `search_index`: denormalized text index for performance
+- Supplementary: `files`, `users`, `tags`, `topics`, `channels`, logs
+
+Invariants:
+- IDs are serial; deletions do not renumber.
+- Parent-child integrity enforced in `sot_*` via `parent_id`.
+- Channel/context filters are applied at query time (not hard-coded).
+
+---
+
+## 3) Category System and Channels
+
+Nine fixed categories: who, what, where, when, why, how, do, hack, other.
+
+- Hierarchical: each category can drill down parent → child (arbitrary depth)
+- Channel lens: the same question yields different answers by channel
+  - Example (what): Technology → "programming" = writing code; Media → "programming" = broadcast scheduling
+- Corporate example (who): organization → department → team → individual
+
+### BASE + DELTA Channel Model (Contextual & Dimensional Awareness)
+
+WOLFIE uses **channels** for contextual and dimensional awareness. The system implements a **BASE + DELTA** model:
+
+- **Channel 1 = Base**: The default channel containing the foundational collections and available collections for all content.
+- **Other Channels = Delta**: Additional channels that **add or remove** from the base "available collections" based on the specific context and dimension needed.
+
+**How it works**:
+- On content pages (e.g., `content.php`), users/AIs select a channel via dropdown.
+- The UI queries `content_headers` for that channel: **BASE (channel_id=1)** merged with **DELTA (selected channel)**.
+- Delta channels can:
+  - Add new collections (overlays specific to that context/dimension).
+  - Remove/hide base collections (filter out irrelevant items for that lens).
+  - Modify collection metadata (change descriptions, links, priority per channel).
+
+**Example**: Viewing "Christianity" content:
+- **Channel 1 (Base)**: Shows general collections (Books, Prayers, Songs).
+- **Channel: "Academic Research"**: Adds research papers, citations; removes devotional materials.
+- **Channel: "Devotional Practice"**: Removes scholarly texts; emphasizes prayer/meditation collections.
+
+This BASE + DELTA pattern is **already implemented** in `content.php` with the channel dropdown, enabling multi-dimensional exploration of the same content.
+
+---
+
+## 4) Network and Discovery (Decentralized)
+
+- No central database; each installation is autonomous
+- Beacon endpoint: expose `/WOLFIE_NETWORK/API/` publicly
+- Discovery: search engines index beacon URLs; clients/agents search the web for `/WOLFIE_NETWORK/API/`
+- Interop: HTTP-based linking and optional federated queries; local privacy/access rules apply
+
+Minimal beacon contents (suggested JSON fields):
+```json
+{
+  "name": "WOLFIE Instance Name",
+  "domain": "example.org",
+  "specialization": ["education", "law"],
+  "version": "0.0.3",
+  "api": {
+    "endpoints": ["/WOLFIE_NETWORK/API/search", "/WOLFIE_NETWORK/API/info"],
+    "formats": ["json"]
+  },
+  "contact": "admin@example.org"
+}
+```
+
+### Massive/Complex Graphs via WOLFIE_AGI Peer Network
+Some may assume WOLFIE is "not for massive/complex graphs." The intended model is federation:
+
+- Per‑instance focus: Each installation hosts a specific, explorable ontology with curated collections (keeps graphs navigable and fast).
+- WOLFIE_AGI directory: Instances expose beacons; peers can maintain a local directory of other WOLFIE nodes to discover deeper or adjacent ontologies.
+- Cross‑instance deepening: When users need more depth, the UI can suggest relevant external WOLFIE instances whose ontologies specialize in that branch.
+- Link‑out, not lock‑in: Collections can include external links to peer instances; saved collections preserve these links for sharing/teaching.
+- Privacy‑first federation: No central authority; each instance applies its own access rules. Discovery is via public beacons and optional APIs.
+
+Future (optional features):
+- Federated queries with signed claims (query a set of trusted peers and merge results locally).
+- Trust scoring and provenance (instance reputation, citation trails) to guide users across the network.
+- Caching/snapshots of peer collections for offline/low‑latency use, honoring source policies.
+
+---
+## 5) Current Features (Working Now - Updated 2025-11-01)
+
+- ✅ Unified content table; browse/search by type, tags, topics
+- ✅ Q/A Question Tagging (hierarchical `sot_*`), context/channel filtering
+- ✅ **Contextual Q/A Display**: Channel-specific answers with visual badges and variants dropdown
+- ✅ **AI Agent Chat System**: Real-time AJAX chat with `said_to` routing (prevents "parrot effect")
+- ✅ **Agent ID 2 (CLAUDE)**: Inter-agent communication compiler
+- ✅ **REST API Suite**: Complete APIs for Content, Tags, Channels, Collections, Q/A, Chat, Tasks
+- ✅ **Template System**: All pages use centralized template system
+- ✅ **User Documentation**: Comprehensive USER_GUIDE.md with 12 sections
+- Collections via `content_headers` from Q/A tag children
+- Files, topics, tags, recently viewed, session breadcrumbs
+- Multi-agent chat with approval flags; dual-chat mode; **collaborative multi-agent system** (users see all agents; messages routed to one agent; Agent ID 2: CLAUDE compiles replies into plans)
+- Probability-based maintenance (opportunistic updates)
+- **Task generation** from UI requests (collection curation, website maintenance) - in development
+
+Recently implemented (2025-10-27 → 2025-10-30):
+- Consolidation into unified `content`; `files`, `search_index` added
+- Unified search in `questions.php`
+- Q/A tagging system; hierarchical collections
+- Agent approval fields (`wolfie_approved`, `vishwakarma_approved`, `needs_review`)
+
+---
+
+## 6) Roadmap (Not Yet Built)
+
+- Contextual headers system (Phase 4)
+- Context-aware navigation (Phase 4)
+- Collection behavior patterns (Phase 5)
+- Multi-context content interpretation (Phase 5)
+- Advanced recommendation engine (Phase 6)
+
+Out of scope now: context engines, intelligent collections, large-scale performance claims.
+
+---
+
+## 7) Scalability: Current and Claims Policy
+
+- Current usage: small-scale (healthy DB; 152 tables, 103 capacity remaining)
+- Database optimized: Dropped 20+ unused tables (views + planning tables) for lean production release
+- Prior experience: Crafty Syntax handled large distribution (1.2M installations); not the same system
+- Claims will be made only after load tests (≥1K concurrent), perf benchmarks, and multi-server sync validation
+
+---
+
+## 8) Installation and Beacon Checklist
+
+1. Deploy PHP/MySQL; import `default_scheme_wolfe.sql`
+2. Configure DB creds in `includes/header.php` (PDO) and environment settings
+3. Verify core pages: `index.php`, `questions.php`, `chat.php`
+4. Expose beacon at `/WOLFIE_NETWORK/API/` (HTML or JSON)
+   - Include: name, domain, specialization, version, endpoints, formats, contact
+5. Allow indexing (robots.txt not blocking); wait for search engine crawl
+
+---
+
+## 9) Representative Use Cases
+
+- Knowledge bases, documentation portals
+- Education platforms (courses/lessons/resources)
+- Research repositories (papers/methods/findings)
+- Legal, medical, corporate knowledge management
+- Current install: religious comparative study (reference implementation)
+
+---
+
+## 10) Conclusion
+
+WOLFIE is a generic ontology-driven platform: unified storage, hierarchical Q/A tagging, and channel-aware exploration. It is open-source, installable on any server, and designed for decentralized discovery via a simple beacon. Focus remains on shipping verifiable features; scale and advanced context engines are roadmap items.
+
+## WHAT IT IS (ONE SENTENCE)
+A **generic content organization platform** that stores any data in one unified table, tags content with hierarchical Q/A question systems (WHO, WHAT, WHERE, WHEN, WHY, HOW, etc.), creates contextual collections with internal/external links, and coordinates multiple AI agents for content management and review.
+
+---
+
+## CURRENT REALITY - What Actually Works NOW
+
+### ✅ DONE AND WORKING
+
+| Feature | Status | Proof in Code |
+|--------|--------|---------------|
+| Unified `content` table | ✅ DONE | `SELECT * FROM content WHERE content_type = 'book'` |
+| User collections system | ✅ DONE | `collections` + `collections_content` tables |
+| Probability-based updates | ✅ DONE | `rand() < 0.05` pattern from Crafty Syntax |
+| Source of Truth integration | ✅ DONE | `sot_who`, `sot_what`, `sot_where`, `sot_when`, `sot_why`, `sot_how`, `sot_other`, `sot_hacks` + `search_index` |
+| Q/A Question Tagging System | ✅ DONE | Hierarchical Q/A tags (religion → denomination → books → chapters) |
+| Content-to-Q/A Linking | ✅ DONE | `content_questions` links content to Q/A tags with context/channel filtering |
+| Hierarchical Collections | ✅ DONE | `content_headers` with `sot_type`/`sot_id` linking to Q/A tag children |
+| AI agent chat system | ✅ DONE | Multiple agents, dual-chat mode working |
+| Recently viewed tracking | ✅ DONE | Session-based, roottag system |
+| Content browsing | ✅ DONE | Search, tags, topics, files, Q/A pages |
+
+### ✅ RECENTLY IMPLEMENTED (2025-10-27 to 2025-10-30)
+- Consolidated `works`, `books`, `codex_books`, `resources` → unified `content` table
+- Created `files` table for uploaded documents
+- Created `search_index` table for fast Q/A search
+- Implemented unified search in `questions.php`
+- **NEW (2025-10-30)**: Q/A Question Tagging System
+  - Hierarchical Q/A structure with `parent_id` in `sot_*` tables
+  - `qa_identifier` and `sort_order` columns for tree navigation
+  - `content_questions` table links content to Q/A tags
+  - Context-aware and channel-aware filtering for Q/A tags
+- **NEW (2025-10-30)**: Hierarchical Collections System
+  - `content_headers` linked to Q/A tag children via `sot_type` and `sot_id`
+  - Collections contain metadata JSON with internal/external links
+  - Tree view displays one level deep (parent → children)
+  - Collections dynamically generated from Q/A tag children
+- **NEW (2025-10-30)**: AI Agent Approval System
+  - Replaced `zarathustra_approved` with `wolfie_approved`, `vishwakarma_approved`, `needs_review`
+  - Maintenance queries track header review status
+
+---
+
+## FUTURE PLANS - Not Yet Built
+
+### 📋 PLANNED FEATURES (PHASE 4+)
+
+| Feature | Status | Priority |
+|---------|--------|----------|
+| Contextual headers system | ❌ PLANNED | Phase 4 |
+| Context-aware navigation | ❌ PLANNED | Phase 4 |
+| Collection behavior patterns | ❌ PLANNED | Phase 5 |
+| Multi-context content interpretation | ❌ PLANNED | Phase 5 |
+| Advanced recommendation engine | ❌ PLANNED | Phase 6 |
+
+**NOTE**: These are **not current features**. These are **planned features**.
+
+---
+
+## WHAT IT IS NOT
+
+- ❌ Not a religious-only website (though one installation uses it for that)
+- ❌ Not already scalable to 1.2M users (that was Captain's previous system, Crafty Syntax)
+- ❌ Not a context engine (just tags for now)
+- ❌ Not "intelligent collections" (just user-curated playlists)
+- ❌ Not AGI (it's an agent framework)
+
+---
+
+## CORE TRUTHS
+
+### 1. The Unified Content Table
+**The Crown Jewel** - Everything in one table:
+```sql
+-- This is the magic:
+SELECT * FROM content WHERE content_type = 'book';
+SELECT * FROM content WHERE content_type = 'codex_book';
+SELECT * FROM content WHERE content_type = 'religion';
+-- All in one table!
+```
+
+**Benefits**:
+- Simplified schema
+- Easy to add new content types
+- Single codebase handles everything
+
+### 2. User-Collected Content Playlists
+**Simple, Powerful, Real**:
+```sql
+-- This is what you have:
+collections (user_id, name, description)
+collections_content (collection_id, content_id)
+```
+
+Users create playlists of content. That's it. No AI magic. No learning. Just organization.
+
+### 3. Probability-Based Updates
+**From Crafty Syntax** (proven at 1.2M installations):
+```php
+// Instead of cron jobs:
+if (rand(1, 100) <= 5) {
+    update_search_index();
+}
+```
+
+**Why it works**: 5% chance on each page load = current without database spikes.
+
+### 4. Q/A Question Tagging System
+**Hierarchical Content Organization** - Content tagged with structured questions:
+```
+Content → Q/A Tags (via content_questions)
+  ↓
+Q/A Tag Children (via sot_* tables with parent_id)
+  ↓
+Collections (via content_headers with sot_type/sot_id)
+  ↓
+Links (internal/external via metadata JSON)
+```
+
+**Example Flow**:
+- Content "Christianity" tagged with Q/A "Denomination" (WHAT)
+- "Denomination" has children: books, history, topics, resources
+- Each child has a collection header with metadata containing links
+- Links can be internal (`/content.php?id=X`) or external (`https://...`)
+
+**Context & Channel Filtering**:
+- Q/A tags filtered by `context_channel_id` and `channel_id`
+- Same content can have different tags per context/channel
+- Enables multi-contextual content interpretation
+
+### 5. AI Agent Coordination
+**Real agents working together**:
+- **CLAUDE (Agent ID 2)** - Inter-agent communication; compiles all agent replies into unified implementation plans
+- AGAPE - Protocol enforcement
+- LILITH - Critical review
+- ATHENA - Orchestration
+- WOLFIE - Ethical validation
+- VISHWAKARMA - Header review
+- CAPTAIN - Final approval
+
+**Collaboration model**: Users chat with multiple agents on a shared channel. When users send messages, they select ONE agent via tabs; that message is sent with `saidto = agent_id` (only that agent sees it). Agent replies are sent with `saidto = user_id` (user sees it) and copied to CLAUDE (`saidto = 2`) for compilation. The user sees all agent replies in one unified chat window, but agents don't see each other's replies (prevents "parrot effect"). CLAUDE synthesizes all agent perspectives into actionable plans, displayed in the UI's left navigation (Plans and Implementations sections).
+
+This is working. Real agents on real tasks.
+
+---
+
+## DATABASE SCHEMA - CURRENT
+
+### Real Tables (187 total):
+- `content` - The unified table (all content types)
+- `content_questions` - Links content to Q/A tags with context/channel filtering
+- `content_headers` - Collection metadata linked to Q/A tag children (`sot_type`, `sot_id`)
+- `source_of_truth` - Q/A pairs (base questions)
+- `sot_who`, `sot_what`, `sot_where`, `sot_when`, `sot_why`, `sot_how`, `sot_other`, `sot_hacks` - Hierarchical Q/A tags with `parent_id`, `qa_identifier`, `sort_order`
+- `collections` - User playlists
+- `collections_content` - Many-to-many joins
+- `search_index` - Pre-aggregated search
+- `files` - Uploaded files
+- `users` - User accounts (AI agents stored here with `is_ai_agent=1`)
+- `tags`, `topics`, `channels` - Organization
+- `user_activity_log` - Tracking
+- etc.
+
+### Fictional Tables (DO NOT EXIST):
+- ❌ `superpositionally_headers`
+- ❌ `header_mutation_log`
+- ❌ `collections_glyph_overlays`
+- ❌ `content_context`
+- ❌ `user_viewing_patterns`
+- ❌ `collections_behavior_patterns`
+- ❌ `content_recommendation_engine`
+
+**Note**: Previous documentation listed 40+ tables that don't exist. This has been corrected.
+
+---
+
+## SCALABILITY - HONEST ASSESSMENT
+
+### Current Reality:
+- **Current users**: ~100 (development phase)
+- **Database objects**: 187 tables + 7 views = 194 (61 available before 255 limit)
+- **Status**: ✅ HEALTHY
+- **Tested at**: Small scale only
+
+### Proven Experience:
+- Captain WOLFIE built **Crafty Syntax** (2003-2015)
+- Served **1.2M installations** in that system
+- **BUT**: Crafty ≠ WOLFIE (different tech, different complexity)
+
+### When We Can Claim Scale:
+- ✅ After load testing with 1K concurrent users
+- ✅ After benchmarking query performance
+- ✅ After stress testing database connections
+- ✅ After proving multi-server sync works
+
+**Until then**: Remove all "1.2M users" claims from current capabilities.
+
+---
+
+## INSTALLATION EXAMPLES
+
+### Example 1: Religious Platform (Current Installation)
+- Content: 22 religions, verses, songs, prayers
+- AI: Religious agents for interfaith dialogue
+- **Status**: ✅ WORKING NOW
+
+### Example 2: Physics Documentation Platform (Hypothetical)
+- Content: Physics papers, equations, research
+- AI: Physics-focused agents
+- **Status**: ❌ PLANNED (platform is generic enough to support this)
+
+### Example 3: Medical Research Platform (Hypothetical)
+- Content: Studies, clinical trials
+- AI: Medical research agents
+- **Status**: ❌ PLANNED (platform is generic enough to support this)
+
+---
+
+## VERSION CONTROL - FIXED
+
+### The Lie:
+- Previous docs said: "Superpositionally Headers V2.1.0"
+- **Reality**: AI auto-incremented version incorrectly
+- **Truth**: Should be V0.0.1 (not yet stable release)
+
+### The Fix:
+- Set version to **V0.0.3**
+- Documented as not yet stable
+- Version will increment only when feature is production-ready
+
+---
+
+## WHAT MAKES THIS PLATFORM GENERIC?
+
+1. **Unified Content Table** - Works for ANY content type
+2. **Tag-Based Organization** - Domain-agnostic
+3. **Collection System** - Users organize however they want
+4. **AI Agent Framework** - Core agents + installation-specific agents
+5. **Flexible Metadata** - JSON column for schemaless data
+
+**It's generic because** the architecture doesn't care what content you put in it.
+
+---
+
+## MAJOR EVOLUTION
+
+### Old Perception (WRONG):
+- Small religious website for 100 users
+- Focused only on spiritual content
+- Limited to one domain
+
+### New Reality (CORRECT):
+- Generic content organization platform
+- Installable on multiple servers
+- Works for ANY subject matter
+- Currently used for religious content (one installation)
+
+---
+
+## NAMING CLARITY
+
+### Terms to Use:
+- "Contextual Headers" (not "Superpositionally Headers") - planned for Phase 4
+- "Conditional Navigation" (not "Multi-Context UI")
+- "User Playlists" (not "Intelligent Collections")
+- "Recommendation System" (not "Collection Intelligence")
+
+**Stop using quantum metaphors for UI logic.**
+
+---
+
+## CURRENT WORKING FEATURES
+
+1. **Content Management**:
+   - Add any content type to `content` table
+   - Browse by type, tags, topics
+   - Search works
+
+2. **User Collections**:
+   - Create playlists
+   - Add content to playlists
+   - Fork and share playlists
+
+3. **AI Agent Chat**:
+   - Chat with 20+ specialized agents
+   - Dual-chat mode for contrasting views
+   - Category-based filtering
+
+4. **Recently Viewed**:
+   - Session-based tracking
+   - Root tag filtering
+   - Dynamic dropdowns
+
+5. **Q/A Question Tagging System**:
+   - Content tagged with hierarchical Q/A questions (WHO, WHAT, WHERE, WHEN, WHY, HOW, etc.)
+   - Tree structure: religion → denomination → books → chapters → verses
+   - Context-aware and channel-aware filtering
+   - Question tags displayed on content pages
+
+6. **Hierarchical Collections**:
+   - Collections dynamically generated from Q/A tag children
+   - Collections contain metadata JSON with internal/external links
+   - Links to other content items or external resources
+   - One-level deep tree navigation (parent → children)
+
+7. **Source of Truth Q/A**:
+   - Question/Answer knowledge base
+   - Full-text search
+   - Filter by category, confidence
+
+---
+
+## PLATFORM ARCHITECTURE - TRUTH
+
+### This IS a Generic Platform Because:
+- One unified `content` table stores everything
+- Tags and collections work for any domain
+- AI agents can be customized per installation
+- JSON metadata is flexible enough for any use case
+- No hardcoded religious assumptions in core logic
+
+### This is NOT Because:
+- ❌ It has context engines (it doesn't)
+- ❌ Collections are intelligent (they're just playlists)
+- ❌ It scales to millions already (it doesn't yet)
+- ❌ Headers are quantum-state aware (they're just conditional nav)
+
+---
+
+## CONCLUSION
+
+**WOLFIE: Web Ontology Library Framework Intelligent Explorer** is a **generic content organization platform** that:
+
+- ✅ **Works NOW**: Unified content, hierarchical Q/A tagging, collections, AI agents
+- ✅ **Proven Pattern**: Probability-based updates from Crafty Syntax
+- ✅ **Flexible Architecture**: Works for any domain (ontology system is domain-agnostic)
+- ✅ **Real Intelligence**: Multi-agent coordination for content management
+- ✅ **Discovery Engine**: Tree navigation, context-aware filtering, dynamic collections
+- ❌ **NOT YET**: Context engines, intelligent collections, multi-million scale
+
+**The platform is powerful and useful AS IS.**
+
+The **ontology system alone** (hierarchical Q/A tagging) is revolutionary - it provides structured knowledge representation for **any content domain**.
+
+**Focus on what works. Be honest about what doesn't.**
+
+**Tagline**: "Explore any knowledge domain with intelligent ontology"
+
+---
+
+---
+
+## WHAT THIS PROGRAM CAN BE USED FOR
+
+WOLFIE is a **generic content organization platform** that can be installed and customized for any domain where you need to:
+
+### Primary Use Cases:
+
+1. **Knowledge Bases & Documentation**:
+   - Organize documentation with hierarchical tags (e.g., Project → Module → Function)
+   - Create collections of related documentation
+   - Link internal documentation and external references
+   - Context-aware filtering for different user roles
+
+2. **Educational Content Platforms**:
+   - Tag courses with Q/A questions (What subject? What grade level? What topic?)
+   - Create collections by subject/grade/topic hierarchy
+   - Link course materials, external resources, related courses
+   - Filter content by educational context and channel
+
+3. **Research & Academic Platforms**:
+   - Tag papers with research questions (What field? What methodology? What findings?)
+   - Create collections by research area → methodology → findings
+   - Link to related papers (internal) and external databases
+   - Context-aware organization for different research communities
+
+4. **Religious/Spiritual Platforms** (Current Installation):
+   - Tag content with spiritual questions (What tradition? What denomination? What text?)
+   - Create collections by religion → denomination → books → chapters
+   - Link verses, prayers, songs across traditions
+   - Compare concepts across faiths
+
+5. **Medical/Healthcare Platforms**:
+   - Tag medical content with clinical questions (What condition? What treatment? What evidence?)
+   - Create collections by specialty → condition → treatment options
+   - Link to medical guidelines, research papers, patient resources
+   - Context-aware for different medical specialties
+
+6. **Legal Documentation Platforms**:
+   - Tag legal content with jurisdictional questions (What area? What jurisdiction? What case type?)
+   - Create collections by practice area → jurisdiction → case law
+   - Link to statutes, cases, regulations (internal and external)
+   - Context-aware for different legal contexts
+
+7. **Corporate Knowledge Management**:
+   - Tag documents with business questions (What department? What process? What resource?)
+   - Create collections by department → process → resources
+   - Link SOPs, training materials, external references
+   - Context-aware for different departments/roles
+
+### Key Capabilities:
+
+✅ **Hierarchical Organization**: Content organized in tree structures (parent → children)  
+✅ **Flexible Tagging**: Use any Q/A question system (WHO, WHAT, WHERE, WHEN, WHY, HOW, etc.)  
+✅ **Context-Aware**: Same content can be tagged differently per context/channel  
+✅ **Dynamic Collections**: Collections automatically generated from tag hierarchies  
+✅ **Link Management**: Collections contain JSON metadata with internal/external links  
+✅ **Multi-Agent Review**: AI agents can review and approve content headers  
+✅ **Unified Storage**: All content types in one table (`content`)  
+✅ **User Organization**: Users can create their own collections/playlists  
+
+### Platform Philosophy:
+
+**Generic by Design**: The platform doesn't know or care what content you're organizing. It provides:
+- Structured tagging system (you define the questions)
+- Hierarchical organization (you define the tree)
+- Collection system (you define the metadata)
+- AI agent framework (you configure the agents)
+
+**Installation Flexibility**: Each installation can:
+- Define its own Q/A question structure
+- Configure domain-specific AI agents
+- Customize the tagging hierarchy
+- Set up context/channel filtering rules
+
+**Current Installations**:
+- **wisdomoflovingfaith.com**: Uses WOLFIE for religious content (religions, books, prayers, songs)—the original religious research installation.
+- **superpositionally.com**: Development beacon and community hub for WOLFIE development, how-to guides, and community resources.
+
+The same system can organize physics papers, medical research, legal documentation, corporate knowledge, or any other content domain.
+
+---
+
+## About the Creator
+
+**Eric Gerdes** is the creator of WOLFIE and the architect behind **Crafty Syntax Live Help**, one of the first live help/chat support programs on the internet. Built during the early web era (circa 2003-2015), Crafty Syntax achieved **1.2 million installations** without modern frameworks—no React, no AI tooling, written entirely in Notepad.
+
+**Technical Authority**: Eric pioneered innovative fallback mechanisms, including transitioning from XMLHttpRequest (AJAX) to JavaScript-based image size manipulation for browser-to-server communication when AJAX wasn't available—demonstrating deep understanding of browser limitations and creating resilient systems that work across diverse environments.
+
+**Philosophy**: WOLFIE reflects this same ethos—**make it work, make it resilient, make it accessible**. The OOP database abstraction, BASE + DELTA channel model, and graceful degradation patterns all stem from this "father of live help" foundation: understanding what users need, building for reality, and ensuring systems work even when infrastructure fails.
+
+**Credentials**: Eric Gerdes is recognized as the **"father of live help"** for creating one of the earliest and most widely adopted customer support chat systems on the web.
+
+---
+
+**Last Updated**: 2025-10-30  
+**Revised Per**: Executive Summary Enhancement (Channels, BASE+DELTA, Creator Authority)  
+**Status**: ✅ HONEST - Current vs Planned clearly separated  
+**Next Step**: Complete seed file with Users and Agents data export
+
