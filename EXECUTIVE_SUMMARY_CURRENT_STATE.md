@@ -1,3 +1,19 @@
+---
+title: EXECUTIVE_SUMMARY_LUPOPEDIA_CURRENT_STATE.md
+agent_username: wolfie
+date_created: 2025-10-30
+last_modified: 2025-11-08
+status: published
+onchannel: 1
+tags: [SYSTEM, DOCUMENTATION]
+collections: [WHO, WHAT, WHERE, WHEN, WHY, HOW]
+in_this_file_we_have: [UPDATE_2025_10_30, OVERVIEW_LUPOPEDIA, ARCHITECTURE_OVERVIEW, AI_AGENT_INTEGRATION, DATA_MODEL, CATEGORY_SYSTEM_CHANNELS, NETWORK_DISCOVERY, CURRENT_FEATURES, ROADMAP_TIMELINE, SCALABILITY, INSTALLATION_CHECKLIST, USE_CASES, CONCLUSION, WHAT_IT_IS, CURRENT_REALITY, FUTURE_PLANS, WHAT_IT_IS_NOT, CORE_TRUTHS, DATABASE_SCHEMA, SCALABILITY_ASSESSMENT, INSTALLATION_EXAMPLES, VERSION_CONTROL, GENERIC_PLATFORM, MAJOR_EVOLUTION, NAMING_CLARITY, WORKING_FEATURES, PLATFORM_ARCHITECTURE, WHAT_THIS_CAN_BE_USED_FOR, ABOUT_CREATOR]
+---
+
+**NOTE:** This file describes **LUPOPEDIA** (the web application platform), not the WOLFIE Header System. For information about the WOLFIE Header System, see EXECUTIVE_SUMMARY_WOLFIE_CURRENT_STATE.md.
+
+---
+
 ### 2025-10-30 Update
 
 - Unified schema cleanup completed:
@@ -12,44 +28,122 @@
 
 # WOLFIE: Executive Summary
 
-Date: 2025-11-01
-Version: 0.0.5 (Development) - Latest Release: 0.0.4 (2025-11-01)
-Status: Post-release development - v0.0.4 packaged and released
+Date: 2025-11-08
+Version: 0.0.8 (Current Release) - Next Milestone: 0.1.0 (Sales Syntax migration tooling)
+Status: Active development - v0.0.7 collections remix complete; v0.1.0 now bundles legacy Live Help schema
 
 ## Overview of WOLFIE
-**WOLFIE (Web Ontology Library Framework Intelligent Explorer)** is a **domain-agnostic, open-source platform** for organizing **any type of knowledge** into a structured, explorable ontology. It uses a **single unified `content` table** to store heterogeneous data (books, files, resources, etc.), tagged with **hierarchical Q/A questions** (WHO, WHAT, WHERE, WHEN, WHY, HOW, DO/HACK/OTHER). These tags create **dynamic, context-aware collections** for navigation, filtered by **channels** using a **BASE + DELTA model** (Channel 1 = base collections; other channels add/remove/modify based on context and dimension). The system is **contextually and dimensionally aware**—the same content reveals different collections per channel (e.g., "programming" means code in Tech channel, broadcast schedules in Media channel). It's built on **PHP + MySQL**, supports **multi-AI agent coordination** for chat/review/approval, and enables **decentralized discovery** via public beacon endpoints—allowing independent installations to form a networked ecosystem without a central authority.
+**WOLFIE (Web Ontology Library Framework Intelligent Explorer)** remains a **domain-agnostic, open-source platform** for organizing **any type of knowledge** into a structured, explorable ontology, with the runtime pipeline now fully described. Every content view runs through `public/content.php`: the base record is fetched from `content`, BASE + DELTA merges Channel 1 overlays with the selected channel, and the assembled payload returns collections, headers, question tags, glyph stubs, and hierarchical tags in one response.
+- **Collections orchestration:** `content_collections` is queried twice—once for Channel 1 and again for the requested channel—so base trays always exist while contextual trays can override or append. If a page has no direct collections, the loader automatically inherits them from `parent_content_id` to keep navigation intact.
+- **Header overlays:** `content_headers` follows the same merge pattern, producing the WOLFIE header bar by letting channel-specific records replace or augment base metadata (`data_type`, `value`, `metadata`, `header_confidence_score`).
+- **Source-of-Truth question tags:** The loader joins `content_questions` to the nine SOT tables, decorates each relationship with root tags pulled from `sot_tags`, and respects `context_channel_id` so question variants stay scoped per channel lens.
+- **Hierarchical tag lattice:** `content_tags` and `tags` expose the hand-curated taxonomy. The `load_tag_children` endpoint returns only the tag children that are actually applied to the current content, keeping the UI aligned with live data rather than the full taxonomy.
+- **Saved collection flow:** `add_to_saved_collections` hydrates the session-backed structure maintained by `RecentlyViewedTracker`. Default JSON seeds the nine Q/A buckets, items are deduplicated per `content_id`, and lists are trimmed to 50 items so sharing payloads stays lightweight.
+
+The system is still **contextually and dimensionally aware**—the same content reveals different collections per channel (e.g., "programming" means code in Tech, broadcast schedules in Media)—while running on **PHP with multi-database support**, coordinating **multi-AI agent chat** via `saidto` routing, and exposing **decentralized discovery** beacons so installations locate each other without central control.
+
+> **Sales Syntax Schema Embedded (2025-11-08):** Migration 1069 imported all 34 legacy `livehelp_*` tables into LUPOPEDIA alongside the existing 152-platform tables (total = 186). PORTUNUS now performs upgrades by streaming data directly from Sales Syntax v3.7.0 into the matching tables—no schema rebuild or CSV detour required.
 
 **Historical Evolution**: WOLFIE evolved from "Wisdom of Loving Faith," originally designed as a religious research site. The system's generic architecture allowed it to be repurposed into a general-purpose ontology framework, rebranded as WOLFIE. The platform's original design philosophy remains intact: domain-agnostic, ontology-driven, and channel-aware exploration.
 
-**Current Installations**:
-- **lupopedia.com**: Main WOLFIE platform - downloads, documentation, community hub, generic ontology framework (Official platform website)
-- **wisdomoflovingfaith.com**: Religious installation - interfaith spiritual content, 22+ religions, comparative analysis (Example installation)
-- **superpositionally.com**: R&D and innovation lab - superpositionally headers development, experimental features (Development beacon)
+### Human-Readable Ontology (Channel Aware)
 
-**Current Maturity (as of 2025-11-01)**: **Version 0.0.5** (Development), **Latest Release: 0.0.4** (Released 2025-11-01). **Core features work now** (unified storage, tagging, collections, AI chat with `said_to` routing, contextual Q/A, REST APIs, mobile interface). **v0.0.4 includes complete mobile interface** (Search, Content, Agents, Profile). Proven at small scale (~100 users, 152 DB objects); large-scale claims pending load tests.
+| Top-Level Tag | Example Subclasses | Sample Relationships |
+|---------------|-------------------|----------------------|
+| **WHO** | Organization → Department → Team → Individual | `who:teaches` → WHAT, `who:located_in` → WHERE |
+| **WHAT** | Field → Subfield → Topic → Resource | `what:requires` → HOW, `what:motivated_by` → WHY |
+| **WHERE** | Region → City → Venue → Room | Transitive `where:within`, `where:hosts` → WHAT |
+| **WHEN** | Era → Year → Month → Event | `when:occurs_during` → WHY, `when:scheduled_with` → HOW |
+| **WHY** | Mission → Goal → Objective → Outcome | `why:drives` → DO, `why:justifies` → WHAT |
+| **HOW** | Method → Process → Step → Tool | Functional `how:has_procedure`, `how:supported_by` → DO |
+| **DO** | Action → Task → Checklist → Behavior | `do:performed_by` → WHO, `do:happens_at` → WHERE |
+| **HACK / OTHER** | Pattern → Experiment → Exception | `hack:extends` → HOW, channel annotations |
+
+- **BASE + DELTA model:** Channel 1 establishes base definitions; each additional channel contributes a delta layer (extra subclasses, alternate labels, context-specific relationships).
+- **Agent resolution order:** channel-specific folder → `md_files/{channel}_wolfie_wolfie/` → `md_files/{channel}_wolfie/` legacy.
+- **Collections as shareable ontology slices:** Users and agents follow the same steps—select channel, traverse tag hierarchy, attach relationships, save as a collection. Collections can be **published to profiles, remixed by collaborators, and reinterpreted instantly when channel context changes** without touching underlying content.
+
+**Current Installations** (6 sites in testing/release order):
+
+| Site | Database | Status | Version | Purpose |
+|------|----------|--------|---------|---------|
+| **collabrativepages.com** | MySQL 8.0 | ✓ Live | v0.0.5 | Tests shared hosting + MySQL compatibility - backward-compatibility fallback test |
+| **wisdomoflovingfaith.com** | MySQL 8.0 | ✓ Live | v0.0.5 | Religious Research Archive - 22+ religions, interfaith analysis, 48 Religious AI Agents seeded |
+| **servantsofsouls.org** | Postgres (Shared/Dedicated) | 📋 Planned | v0.0.x | Non-Profit Ontology - charitable organizations and non-profit organizations directory |
+| **lupopedia.com** | Dedicated Hosting | 📋 Planned | v0.0.x | Official WOLFIE platform hub - tests different server environment |
+| **alternatefate.com** | Supabase (Serverless) | 📋 Planned | v1.x.x+ | Personal Timeline Explorer - requires serverless support (v1.x.x+) |
+| **superpositionally.com** | Supabase (Serverless + Temporal) | 📋 Planned | v2.x.x | R&D Innovation Lab - requires temporal support (v2.x.x to avoid over-complication) |
+
+**Current Maturity (as of 2025-11-07)**: **Version 0.0.7** (Released 2025-11-05). **Core features work now** (unified storage, tagging, collections, AI chat with `said_to` routing, contextual Q/A, REST APIs, mobile interface). **v0.0.7 adds the documented collection remix workflow** and keeps shared hosting + MySQL deployments verified on collabrativepages.com and wisdomoflovingfaith.com. **v0.1.0** remains the next milestone for the universal database abstraction layer (MySQL + PostgreSQL + Supabase) with graceful feature degradation. Proven at small scale (~100 users, 152 DB objects); large-scale claims pending load tests.
 
 ### Database and Portability
-- Current database: **MySQL** (PDO). **152 tables** (down from 165), **0 views** (all dropped for stability), **103 capacity remaining** toward 255-table limit.
-- Code paths written with OOP-style connection/query abstractions so the storage engine can be swapped (e.g., PostgreSQL, SQLite) with minimal surface-area changes.
-- Design intent: Treat the SQL store as the canonical source now, but avoid hard-coupling the application logic to MySQL-specific features where not required.
-- Collections-first: Downstream systems ultimately consume **collections as JSON**; persistence backends can evolve without breaking the UX contract.
 
-### Vectorization Roadmap
-- Background task/agent can incrementally build a **vector index** from the SQL source of truth (respecting channels and Q/A hierarchies), using the curated UI flows to capture human-approved structure.
-- Pipeline concept: `content` + `content_questions` + `content_headers` → normalized passages with metadata → embedding → vector DB (e.g., FAISS, pgvector, SQLite+VSS).
-- Goal: Maintain SQL as the authoritative model while enabling **semantic retrieval** for agents and advanced search.
-- Status: Planned; not required for core functionality today.
+**v0.0.5 (Current Stable - Released 2025-11-03)**:
+- Database: **MySQL 8.0** (PDO). **186 tables** (legacy 34 `livehelp_*` + 152 LUPOPEDIA core), **0 views**, **69 capacity remaining** toward 255-table limit.
+- Code paths written with OOP-style connection/query abstractions.
+- Tested and deployed on collabrativepages.com and wisdomoflovingfaith.com
+- Shared hosting + MySQL compatibility verified
+
+**v0.0.6 (In Development) - Simplified Database Abstraction Layer**:
+- **DatabaseInterface** - Basic abstraction supporting MySQL and PostgreSQL
+- **Multi-Database Support** (v0.0.6 - Basic Only):
+  - **MySQL 8.0**: For collabrativepages.com and wisdomoflovingfaith.com (shared hosting)
+  - **PostgreSQL**: For servantsofsouls.org and lupopedia.com (shared/dedicated hosting)
+- **Backward Compatibility**: wisdomoflovingfaith.com and collabrativepages.com continue unchanged
+- **First Principles Design**: Pure PHP/SQL, no framework lock-in, simple CRUD operations only
+- **Advanced Features Delayed**:
+  - Vector search → v1.x.x+
+  - Serverless/Supabase → v1.x.x+
+  - JSONB operations → v1.x.x+
+  - Array columns → v1.x.x+
+  - Temporal features → v2.x.x
+  - Probabilistic ontology → v2.x.x
+
+### Probabilistic Ontology (v2.x.x - Future)
+
+**superpositionally.com** will introduce a revolutionary content model where content **does not exist in traditional tables** but manifests from **probabilistic distributions** when contextual dimensions are applied:
+
+- **"WHEN as CHANNEL"**: Time is treated as a contextual lens (2025, 2030, 2050), not a timestamp
+- **Probabilistic Manifestation**: Content collapses from probability distributions based on:
+  - **WHEN context**: Technical concepts evolve over abstract time (e.g., "What is database abstraction in 2025 vs 2030?")
+  - **CHANNEL context**: Developer vs Researcher vs Student perspectives
+  - **Probability weights**: Content fragments have probability scores for manifestation
+- **Implementation**: Supabase with Postgres + pgvector for efficient probability calculations and semantic search
+- **Status**: Planned for v2.x.x (requires temporal support)
+
+**alternatefate.com** will use a **dual temporal model**:
+- **Fixed PAST**: Traditional content storage (life events that actually happened)
+- **Probabilistic FUTURE**: AI-generated alternate timelines based on:
+  - **Decision points**: Key moments where choices created alternate paths
+  - **Branching narratives**: "Choose your own adventure" for personal life stories
+  - **Collaborative AI writing**: User + AI co-create alternate realities
+  - **Ethical guardrails**: Consent pop-ups, daily limits, AGAPE reflection prompts
+- **Implementation**: Supabase with decision trees stored as JSONB, vector search for similar life paths
+- **Status**: Planned for v1.x.x+ (requires serverless support first)
+
+### Vectorization & Semantic Search (v1.x.x+ - Future)
+
+**Implementation Path** (moved to v1.x.x+):
+- **lupopedia.com**: Optional vector enhancement for semantic search
+- **superpositionally.com**: Core feature for probabilistic content manifestation (v2.x.x)
+- **alternatefate.com**: Used for finding similar life paths and decision points
+- Pipeline: `content` + `content_questions` + `content_headers` → normalized passages with metadata → embedding → pgvector
+- Goal: Maintain SQL as the authoritative model while enabling **semantic retrieval** for agents and advanced search
+- Fallback: Vector search → Full-text search → Keyword search (graceful degradation)
+- **Status**: Planned for v1.x.x+ (requires serverless support first)
 
 ### Primary Uses (What You Can Do Right Now)
 WOLFIE excels at **turning raw content into navigable knowledge graphs**. Here's a breakdown of **real-world applications**:
 
 | Use Case | Description | Example Hierarchy (Q/A Tags) | Why It Fits WOLFIE |
 |----------|-------------|------------------------------|--------------------|
+| **Platform Development Hub** (lupopedia.com - Live) | Official WOLFIE platform website with downloads, documentation, developer guides, community resources, and beacon API. | Platform → Development → Documentation → Resources | Proven: Downloads, how-to guides, REST API, network discovery beacon. |
+| **Religious/Spiritual Study** (wisdomoflovingfaith.com - Live) | Comparative faith content (verses, prayers, songs) across 22+ religious traditions. | Religion → Denomination → Book → Verse | Proven: 22 religions tagged; interfaith chat via agents; stable timestamped content. |
+| **Technical Innovation Lab** (superpositionally.com - Alpha) | R&D platform with probabilistic technical ontology where concepts evolve over temporal contexts. | Technology → Concept → Temporal Context (2025/2030) → Manifestation | Revolutionary: "WHEN as CHANNEL"; content manifests from probabilities; vector search. |
+| **Personal Multiverse Explorer** (alternatefate.com - Dev) | Collaborative AI writing platform for exploring alternate life timelines based on decision points. | Life Event → Decision Point → Alternate Path → Outcome | Innovative: Fixed PAST + Probabilistic FUTURE; ethical AI collaboration; JSONB decision trees. |
 | **Knowledge Bases / Documentation** | Store & tag docs, SOPs, APIs; auto-generate collections for quick lookup. | Project → Module → Function | Unified table + tags simplify schema; channels filter by team/role. |
 | **Education Platforms** | Organize courses, lessons, resources; create shareable "briefing packs". | Subject → Grade → Topic → Resource | Hierarchical tags build drill-down views; saved collections as lesson plans. |
 | **Research Repositories** | Tag papers, methods, findings; link internal/external sources. | Field → Methodology → Finding | Dynamic collections from tag children; AI agents for review/summaries. |
-| **Religious/Spiritual Study** (wisdomoflovingfaith.com) | Comparative faith content (verses, prayers, songs). | Religion → Denomination → Book → Verse | Proven: 22 religions tagged; interfaith chat via agents. |
-| **Platform Development** (superpositionally.com) | Development beacon and community hub for WOLFIE itself. | Platform → Development → Community → Resources | Development docs, how-to guides, community resources, beacon endpoint. |
 | **Medical/Healthcare** | Clinical trials, guidelines, patient info. | Condition → Treatment → Evidence | Context filtering (e.g., specialty channel); probability-based updates keep fresh. |
 | **Legal Platforms** | Statutes, cases, regs. | Area → Jurisdiction → Case Type | External links in collections; agent approval for accuracy. |
 | **Corporate KM** | Processes, training, policies. | Dept → Process → Resource | User collections as shareable playlists; beacons for enterprise federation. |
@@ -151,7 +245,9 @@ WOLFIE uses **channels** and the **`saidto` field** (from Crafty Syntax architec
 - `content`: all items (books, songs, resources, codex_books, etc.) in one table
 - `sot_who`, `sot_what`, `sot_where`, `sot_when`, `sot_why`, `sot_how`, `sot_hacks`, `sot_other`: hierarchical Q/A nodes
 - `content_questions`: many-to-many map between content and Q/A nodes; context/channel aware
+- `content_collections`: published trays per channel (base + delta) with inheritance fallback via `parent_content_id`
 - `content_headers`: collection metadata pointing to Q/A children (by `sot_type`, `sot_id`)
+- `content_tags` + `tags`: hierarchical free-form taxonomy with parent/child drill-down
 - `search_index`: denormalized text index for performance
 - Supplementary: `files`, `users`, `tags`, `topics`, `channels`, logs
 
@@ -195,6 +291,16 @@ This BASE + DELTA pattern is **already implemented** in `content.php` with the c
 
 ---
 
+### Saved Collections & Session Layer
+
+- `add_to_saved_collections` and the helper methods in `includes/recently_viewed_tracker.php` maintain per-session Q/A buckets seeded from `data/json/default_saved_collections.json`.
+- Entries are deduplicated by `content_id` and capped at 50 per tag to keep payloads portable for sharing with agents or other users.
+- The session structure mirrors the nine Source-of-Truth categories plus a `tags` bucket, so user-curated collections align with the same vocabulary that drives the SOT tables.
+- When collections graduate from session to permanent storage, the RecentlyViewedTracker persists them into `user_recently_viewed_collections` and `user_recently_viewed_collection_items`, maintaining the exact structure captured in the session layer.
+- Additional endpoints (`load_collections`, `load_tag_children`) expose the same data so mobile, desktop, and agent clients all consume consistent overlays without duplicating business rules.
+
+---
+
 ## 4) Network and Discovery (Decentralized)
 
 - No central database; each installation is autonomous
@@ -232,8 +338,9 @@ Future (optional features):
 - Caching/snapshots of peer collections for offline/low‑latency use, honoring source policies.
 
 ---
-## 5) Current Features (Working Now - Updated 2025-11-01)
+## 5) Current Features (Working Now - Updated 2025-11-02)
 
+**v0.0.4 (Released 2025-11-01)**:
 - ✅ Unified content table; browse/search by type, tags, topics
 - ✅ Q/A Question Tagging (hierarchical `sot_*`), context/channel filtering
 - ✅ **Contextual Q/A Display**: Channel-specific answers with visual badges and variants dropdown
@@ -242,29 +349,95 @@ Future (optional features):
 - ✅ **REST API Suite**: Complete APIs for Content, Tags, Channels, Collections, Q/A, Chat, Tasks
 - ✅ **Template System**: All pages use centralized template system
 - ✅ **User Documentation**: Comprehensive USER_GUIDE.md with 12 sections
-- Collections via `content_headers` from Q/A tag children
-- Files, topics, tags, recently viewed, session breadcrumbs
-- Multi-agent chat with approval flags; dual-chat mode; **collaborative multi-agent system** (users see all agents; messages routed to one agent; Agent ID 2: CLAUDE compiles replies into plans)
-- Probability-based maintenance (opportunistic updates)
-- **Task generation** from UI requests (collection curation, website maintenance) - in development
+- ✅ **Complete Mobile Interface**: Search, Content, Agents, Profile, Collections, Q&A
+- ✅ **Admin Enhancements**: API Keys, File Management, Collections Admin, Tags Admin
+- ✅ Collections via `content_headers` from Q/A tag children
+- ✅ Files, topics, tags, recently viewed, session breadcrumbs
+- ✅ Multi-agent chat with approval flags; dual-chat mode; **collaborative multi-agent system**
+- ✅ Probability-based maintenance (opportunistic updates)
 
-Recently implemented (2025-10-27 → 2025-10-30):
+**v0.0.6 (In Development - Simplified Database Abstraction)**:
+- ✅ **DatabaseInterface**: Basic CRUD contract for MySQL and PostgreSQL
+- ✅ **MySQLDatabase**: Wraps existing Database.php (backward compatible)
+- ✅ **PostgresDatabase**: Basic Postgres PDO implementation
+- ✅ **DatabaseFactory**: Auto-detection by domain
+- ✅ **Backward Compatibility**: All MySQL sites (collabrativepages.com, wisdomoflovingfaith.com) unchanged
+- 🧪 **Testing Phase**: Verify compatibility on all v0.0.x domains
+
+**v0.0.7+ (Planned - Postgres Enhancements)**:
+- 📋 **JSONB Operations** for Postgres sites
+- 📋 **Array Columns** for Postgres sites
+- 📋 **Performance Optimization**
+
+**v1.x.x+ (Planned - Serverless Support)**:
+- 📋 **Supabase Support** (serverless Postgres)
+- 📋 **Vector Search** (pgvector)
+- 📋 **Real-time Subscriptions**
+- 📋 **Alternate Timeline Explorer** (alternatefate.com deployment)
+
+**v2.x.x (Planned - Temporal & Probabilistic Features)**:
+- 📋 **Probabilistic Content Manifestation** (superpositionally.com)
+- 📋 **Temporal Context System** ("WHEN as CHANNEL")
+- 📋 **Experimental Probabilistic Concepts**
+- 📋 **Ethical AI Guardrails** for personal content generation
+
+Recently implemented (2025-10-27 → 2025-11-01):
 - Consolidation into unified `content`; `files`, `search_index` added
 - Unified search in `questions.php`
 - Q/A tagging system; hierarchical collections
 - Agent approval fields (`wolfie_approved`, `vishwakarma_approved`, `needs_review`)
+- Complete mobile interface with touch-optimized UI
+- Database cleanup: 152 tables (down from 165)
 
 ---
 
-## 6) Roadmap (Not Yet Built)
+## 6) Roadmap & Development Timeline (Updated 2025-11-03)
 
-- Contextual headers system (Phase 4)
-- Context-aware navigation (Phase 4)
-- Collection behavior patterns (Phase 5)
-- Multi-context content interpretation (Phase 5)
-- Advanced recommendation engine (Phase 6)
+### v0.0.x: Shared & Dedicated Hosting Compatibility
 
-Out of scope now: context engines, intelligent collections, large-scale performance claims.
+**v0.0.5** (Released 2025-11-03):
+- ✅ Released to collabrativepages.com and wisdomoflovingfaith.com
+- ✅ Tested shared hosting + MySQL compatibility
+- ✅ Extended Religious AI Agents (48 agents)
+
+**v0.0.6** (In Development - SIMPLIFIED):
+- Goal: Basic MySQL + Postgres abstraction layer
+- Deliverables: DatabaseInterface, MySQLDatabase, PostgresDatabase, DatabaseFactory (4 simple classes)
+- Sites Affected: All v0.0.x sites (backward compatible)
+- Time: 2-3 days (simplified from original 10-week plan)
+- Risk: Low (wraps existing code, basic CRUD only)
+
+**v0.0.7+** (Planned):
+- Goal: Postgres feature enhancements (JSONB, arrays)
+- Goal: Performance optimization
+- Goal: Deploy servantsofsouls.org and lupopedia.com
+
+### v1.x.x+: Serverless Support (After v0.0.x Complete)
+
+**v1.x.x+** (Planned):
+- Goal: Add serverless Supabase support
+- Deliverables: SupabaseDatabase class, real-time features, vector search
+- Sites Affected: alternatefate.com (enables deployment)
+- Time: TBD after v0.0.x complete
+
+### v2.x.x: Temporal & Probabilistic Features (Much Later)
+
+**v2.x.x** (Planned):
+- Goal: Implement temporal context and probabilistic ontology
+- Deliverables: ProbabilisticContentManifestor, temporal schemas, "WHEN as CHANNEL"
+- Sites Affected: superpositionally.com (enables deployment)
+- Time: TBD (kept separate to avoid over-complication)
+- Note: Requires serverless from v1.x.x+ first
+
+### Future Phases (Not Yet Scheduled)
+
+- Contextual headers system (Phase 4+)
+- Context-aware navigation (Phase 4+)
+- Collection behavior patterns (Phase 5+)
+- Multi-context content interpretation (Phase 5+)
+- Advanced recommendation engine (Phase 6+)
+
+Out of scope now: context engines beyond probabilistic, intelligent collections beyond manifestation, large-scale performance claims.
 
 ---
 
@@ -727,9 +900,13 @@ WOLFIE is a **generic content organization platform** that can be installed and 
 - Customize the tagging hierarchy
 - Set up context/channel filtering rules
 
-**Current Installations**:
-- **wisdomoflovingfaith.com**: Uses WOLFIE for religious content (religions, books, prayers, songs)—the original religious research installation.
-- **superpositionally.com**: Development beacon and community hub for WOLFIE development, how-to guides, and community resources.
+**Current Installations** (6 sites in testing/release order):
+1. **collabrativepages.com** (✓ Live - v0.0.5): Tests shared hosting + MySQL 8.0 compatibility - backward-compatibility fallback test.
+2. **wisdomoflovingfaith.com** (✓ Live - v0.0.5): Religious Research Archive - 22+ religions, interfaith comparative analysis, 48 Religious AI Agents seeded. MySQL 8.0.
+3. **servantsofsouls.org** (📋 Planned - v0.0.x): Non-Profit Ontology - charitable organizations and non-profit organizations directory. Tests shared/dedicated hosting + Postgres compatibility.
+4. **lupopedia.com** (📋 Planned - v0.0.x): Official WOLFIE platform hub - downloads, documentation, community resources, beacon API for network discovery. Tests dedicated hosting + different server environment.
+5. **alternatefate.com** (📋 Planned - v1.x.x+): Personal Timeline Explorer - AI-assisted life story branching with ethical guardrails. Tests serverless + Postgres + pgvector. Requires serverless support (v1.x.x+). Supabase.
+6. **superpositionally.com** (📋 Planned - v2.x.x): R&D Innovation Lab - probabilistic ontology with temporal contexts ("WHEN as CHANNEL"), extending pgvector compatibility. Requires temporal support (v2.x.x to avoid over-complicating earlier releases). Supabase.
 
 The same system can organize physics papers, medical research, legal documentation, corporate knowledge, or any other content domain.
 
@@ -747,8 +924,8 @@ The same system can organize physics papers, medical research, legal documentati
 
 ---
 
-**Last Updated**: 2025-10-30  
-**Revised Per**: Executive Summary Enhancement (Channels, BASE+DELTA, Creator Authority)  
-**Status**: ✅ HONEST - Current vs Planned clearly separated  
-**Next Step**: Complete seed file with Users and Agents data export
+**Last Updated**: 2025-11-03  
+**Revised Per**: v0.0.5 Release, 6-Site Testing Order, Release Pattern Documentation  
+**Status**: ✅ COMPREHENSIVE - Includes v0.0.5 release info, all 6 installations, testing order, release pattern  
+**Next Step**: Begin v0.0.6 planning (Database Abstraction Layer)
 
