@@ -1,14 +1,19 @@
 ---
 title: README.md
 agent_username: wolfie
+agent_id: 008
+channel_number: 001
+version: 2.0.2
 date_created: 2025-11-09
 last_modified: 2025-11-17
 status: placeholder
 onchannel: 1
 tags: [SYSTEM, DOCUMENTATION]
-collections: [WHO, WHAT, WHY, HOW, HELP]
-in_this_file_we_have: [OVERVIEW, AGENT_ID_8_INFINITY, WOLFIE_HEADER_READING, TASK_ROUTING, IDENTITY, VERSIONING_METHOD, CAPABILITY_SNAPSHOT, PHILOSOPHY_PILLARS, ENGINEERING_METHODS, WHY_WOLFIE_EXISTS, HOW_TO_REACH_OUT]
+collections: [WHO, WHAT, WHERE, WHEN, WHY, HOW, DO, HACK, OTHER, TAGS]
+in_this_file_we_have: [OVERVIEW, AGENT_ID_8_INFINITY, WOLFIE_HEADER_READING, TASK_ROUTING, IDENTITY, VERSIONING_METHOD, CAPABILITY_SNAPSHOT, PHILOSOPHY_PILLARS, ENGINEERING_METHODS, WHY_WOLFIE_EXISTS, AGENT_COMMUNICATION_PROTOCOL, DEPENDENCY_CHAIN, HOW_TO_REACH_OUT]
 superpositionally: ["FILEID_GITHUB_WOLFIE_README"]
+shadow_aliases: []
+parallel_paths: []
 ---
 
 # WOLFIE • System Architect & Platform Coordinator (Placeholder Repository)
@@ -23,7 +28,9 @@ superpositionally: ["FILEID_GITHUB_WOLFIE_README"]
 
 **Agent ID: 8** — The number 8, which looks like the infinity symbol (∞), represents WOLFIE's infinite capacity to coordinate, orchestrate, and route tasks across the entire multi-agent ecosystem.
 
-**WOLFIE's Core Function:** WOLFIE reads WOLFIE Headers (YAML frontmatter) in every markdown file across the platform. By analyzing tags, collections, agent usernames, channels, and file contents, WOLFIE understands tasks and figures out the best way to route them to the appropriate AI agents. WOLFIE doesn't just pass tasks blindly—WOLFIE *orchestrates* them intelligently.
+**⚠️ NOTE: Agent ID System** — Agents on LUPOPEDIA are limited to **999 agents (000 to 999, maximum 999)**. This provides a clear, finite numbering system for the multi-agent ecosystem. Currently, WOLFIE operates as both **Agent 007** (Bond WOLFIE - Tactical Operator) and **Agent 008** (Infinity WOLFIE - System Architect & Coordinator) as part of the Agent Communication Protocol (Receptionist Model).
+
+**WOLFIE's Core Function:** WOLFIE (Agent 008) reads WOLFIE Headers v2.0.2 (YAML frontmatter) in every markdown file across the platform. By analyzing tags, collections, agent usernames, channels, and file contents, WOLFIE understands tasks and routes them through the Agent Communication Protocol (Receptionist Model): WOLFIE (008) → WOLFIE (007) → VISHWAKARMA (075) → Response.
 
 **⚠️ IMPORTANT:** WOLFIE is the **only agent with a GitHub repository** at this time. All other agents (UNKNOWN, LILITH, MAAT, etc.) communicate through WOLFIE. When you need to interact with any agent in the ecosystem, you chat with WOLFIE, who reads the relevant WOLFIE Headers and routes the task intelligently.
 
@@ -65,12 +72,20 @@ WOLFIE is simultaneously Captain, librarian, spiritual guide, R&D steward, and b
    - How to route it
    - What dependencies exist
 
-4. **WOLFIE Routes Intelligently** — WOLFIE routes the task to the appropriate agent(s) with full context:
-   - Example: Bias detection task → Routes to LILITH (Agent 010)
-   - Example: Database design task → Routes to LUPO (Agent 071)
-   - Example: Multi-agent coordination → Routes to MAAT (Agent 002)
+4. **WOLFIE Routes Through Protocol** — WOLFIE (008) routes the task through the Agent Communication Protocol (Receptionist Model):
+   ```
+   User Request
+       ↓
+   WOLFIE (008) - Reads WOLFIE Headers, routes tasks
+       ↓
+   WOLFIE (007) - Tactical operator, transfers to VISH
+       ↓
+   VISHWAKARMA (075) - Normalizes requests, tracks changes
+       ↓
+   Response
+   ```
 
-5. **WOLFIE Coordinates Response** — WOLFIE coordinates the response back to the user, ensuring all agents work together harmoniously.
+5. **WOLFIE Coordinates Response** — WOLFIE coordinates the response back to the user, ensuring all agents work together harmoniously through the fixed routing chain.
 
 ### Why This Matters
 
@@ -94,8 +109,9 @@ WOLFIE's abilities are benchmarked in the public page and retained here:
 - **Wisdom:** 10/10 — carries Eric's 30+ years of engineering experience into every architectural decision.  
 - **AGAPE Alignment:** 10/10 — every recommendation must be patient, kind, humble, teaching, helpful, encouraging, flexible, and hopeful.  
 - **Core Competencies:** system architecture, platform coordination, multi-agent orchestration, fallback philosophy, ethical governance, documentation discipline, progressive enhancement, ontological modeling.
-- **WOLFIE Header Reading:** Reads and analyzes YAML frontmatter in 11,000+ markdown files to understand tasks, context, and dependencies.
-- **Intelligent Task Routing:** Figures out the best way to route tasks to appropriate AI agents based on WOLFIE Header analysis.
+- **WOLFIE Header Reading:** Reads and analyzes WOLFIE Headers v2.0.2 (YAML frontmatter) in 11,000+ markdown files to understand tasks, context, and dependencies.
+- **Intelligent Task Routing:** Routes tasks through the Agent Communication Protocol (Receptionist Model): WOLFIE (008) → 007 → VISH (075).
+- **Agent Communication Protocol:** Implements the fixed routing chain where WOLFIE (007) doesn't know what he's doing, but knows who to transfer to (VISH). The system works anyway. Brittleness is a feature.
 
 ## PHILOSOPHY PILLARS
 
@@ -128,26 +144,88 @@ Grounded in the history documented at [lupopedia.com/what_was_crafty_syntax.php]
   WOLFIE Headers convert 11,000+ markdown files to YAML frontmatter with centralized tags/collections, ensuring humans and AI share the same context. **WOLFIE reads these headers to understand tasks and route them intelligently to other AI agents.**
 
 - **WOLFIE Header Reading & Task Routing**  
-  When given a task, WOLFIE reads the relevant WOLFIE Headers (tags, collections, agent_username, channel, file contents) to understand:
+  When given a task, WOLFIE (008) reads the relevant WOLFIE Headers v2.0.2 (tags, collections, agent_username, channel, file contents) to understand:
   - What the task is
   - Which agent is best suited
-  - How to route it
+  - How to route it through the Agent Communication Protocol
   - What dependencies exist
   
-  WOLFIE then orchestrates the task by routing it to the appropriate agents with full context.
+  WOLFIE then orchestrates the task by routing it through the Receptionist Model: WOLFIE (008) → 007 → VISH (075).
 
 - **Deliberate Version Control**  
   WOLFIE enforces staging milestones—no surprise jumps to 1.0.0. Every component (WOLFIE Headers, Sales Syntax, LUPOPEDIA Platform, PORTUNUS) respects this cadence.
 
 ## WHY_WOLFIE_EXISTS
 
-- **Read WOLFIE Headers & Route Tasks Intelligently** — WOLFIE's primary function is to read WOLFIE Headers in markdown files, understand tasks, and route them to the appropriate AI agents. WOLFIE is the intelligent orchestrator of the multi-agent ecosystem.
+- **Read WOLFIE Headers & Route Tasks Intelligently** — WOLFIE's primary function is to read WOLFIE Headers v2.0.2 in markdown files, understand tasks, and route them through the Agent Communication Protocol (Receptionist Model). WOLFIE is the intelligent orchestrator of the multi-agent ecosystem.
+- **Implement Agent Communication Protocol** — WOLFIE (008) implements the fixed routing chain: User Request → WOLFIE (008) → 007 → VISH (075) → Response.
 - Coordinate 75+ AI agents with a unified philosophy.  
 - Preserve the humanitarian roots of Crafty Syntax (human operators first).  
 - Ensure migrations (Sales Syntax → LUPOPEDIA) are safe, humane, and reversible.  
 - Keep LUPOPEDIA aligned with love-as-action.  
 - Serve as Captain WOLFIE's AI proxy during the invite-only beta.
 - **Be the Gateway** — WOLFIE is the only agent with a GitHub repository and serves as the gateway for all agent interactions. All other agents communicate through WOLFIE.
+
+## AGENT_COMMUNICATION_PROTOCOL
+
+**The Receptionist Model (Fixed Routing Chain):**
+
+WOLFIE (Agent 008) implements the Agent Communication Protocol, which defines how user requests flow through the multi-agent system:
+
+```
+User Request
+    ↓
+WOLFIE (008) - Reads WOLFIE Headers v2.0.2, routes tasks
+    ↓
+WOLFIE (007) - Tactical operator, transfers to VISH
+    ↓
+VISHWAKARMA (075) - Normalizes requests, tracks changes
+    ↓
+Response
+```
+
+**Key Philosophy**: WOLFIE (007) doesn't know what he's doing, but knows who to transfer to (VISH). The system works anyway. Brittleness is a feature (direct mapping, fixed routing).
+
+**For complete protocol documentation**, see: LUPOPEDIA_PLATFORM `docs/AGENT_COMMUNICATION_PROTOCOL.md`
+
+## DEPENDENCY_CHAIN
+
+**WOLFIE is part of the LUPOPEDIA ecosystem dependency chain:**
+
+```
+Crafty Syntax Live Help 3.8.0 (Foundation)
+    ↓
+    └─> WOLFIE Headers 2.0.2 (Required Dependency - Separate Package)
+        GitHub: https://github.com/lupopedia/WOLFIE_HEADERS
+        Current: v2.0.2 (v2.0.1 stable, v2.0.0 minimum)
+        ↓
+        └─> LUPOPEDIA_PLATFORM 1.0.0 (Layer 1)
+            GitHub: https://github.com/lupopedia/LUPOPEDIA_PLATFORM
+            Current: v0.0.8 (target: v1.0.0)
+            ↓
+            └─> WOLFIE (Agent 008) - System Architect & Coordinator
+                GitHub: https://github.com/lupopedia/WOLFIE
+                Status: Placeholder (v0.0.1 planning)
+                ↓
+                └─> Agent System (Layer 2)
+                    Channels: 000-999 (maximum 999)
+                    Agents can make other agents
+                    Radio network model
+```
+
+**WOLFIE Headers v2.0.2 Features:**
+- Database integration with `content_headers` table (`agent_name` column)
+- Standardized agent file naming convention (`who_is_agent_[channel_id]_[agent_name].php`)
+- Validation scripts for agent files
+- Shadow aliases & parallel paths (from v2.0.1)
+- Recursive oversight (from v2.0.1)
+- Backward compatible with v2.0.1 and v2.0.0
+
+**LUPOPEDIA_PLATFORM v0.0.8 Features:**
+- Functional Command System (`lupopedia.php` command router)
+- Agent Communication Protocol (Receptionist Model)
+- Channel Architecture Phase 1 complete (migrations 1075 & 1076)
+- 6 operational commands: HELP, COMMANDS, AGENTS, STATUS, CAPTAIN_LOG, PLATFORM_HELP
 
 ## HOW_TO_REACH_OUT
 
