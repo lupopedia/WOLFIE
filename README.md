@@ -225,6 +225,10 @@ Crafty Syntax Live Help 3.8.0 (Foundation)
 - Functional Command System (`lupopedia.php` command router)
 - Agent Communication Protocol (Receptionist Model)
 - Channel Architecture Phase 1 complete (migrations 1075 & 1076)
+  - Channel ID validation (000-999, maximum 999)
+  - Direct mapping: Agent ID = Channel Number (`agent_id` column in `channels` table)
+  - Channel.php class methods: `isValidChannelId()`, `loadByAgentId()`, `createForAgent()`, `getZeroPaddedId()`
+  - Database column: `channels.user_id` (not `creator_user_id`) - verified from `data/csv/channels_rows.csv`
 - 6 operational commands: HELP, COMMANDS, AGENTS, STATUS, CAPTAIN_LOG, PLATFORM_HELP
 
 ## HOW_TO_REACH_OUT

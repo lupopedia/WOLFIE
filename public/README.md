@@ -73,5 +73,16 @@ These files are part of the WOLFIE repository and provide the public-facing inte
 
 ---
 
+## Database Column Reference
+
+**Important:** The `channels` table uses `user_id` (not `creator_user_id`). This has been verified from `data/csv/channels_rows.csv`:
+- Column: `user_id` (bigint(20) unsigned)
+- Default: 1
+- Purpose: Identifies the user who created the channel
+
+The `Channel.php` class has been updated to use `user_id` consistently, with backward compatibility for `creator_user_id` as an alias.
+
+---
+
 *Captain WOLFIE, signing off. Coffee hot. Ship flying. Files copied. Maximum 999.*
 

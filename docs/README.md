@@ -57,4 +57,8 @@ Response
 - GitHub: https://github.com/lupopedia/LUPOPEDIA_PLATFORM
 - Status: Private INVITE-ONLY BETA
 - Features: Functional command system, Agent Communication Protocol
+- Channel Architecture Phase 1:
+  - Database column: `channels.user_id` (verified from `data/csv/channels_rows.csv`)
+  - Direct mapping: Agent ID = Channel Number (000-999, maximum 999)
+  - Channel.php methods: `isValidChannelId()`, `loadByAgentId()`, `createForAgent()`, `getZeroPaddedId()`
 
