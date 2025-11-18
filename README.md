@@ -229,6 +229,16 @@ Crafty Syntax Live Help 3.8.0 (Foundation)
   - Direct mapping: Agent ID = Channel Number (`agent_id` column in `channels` table)
   - Channel.php class methods: `isValidChannelId()`, `loadByAgentId()`, `createForAgent()`, `getZeroPaddedId()`
   - Database column: `channels.user_id` (not `creator_user_id`) - verified from `data/csv/channels_rows.csv`
+  - Phase 1 test script: `public/agents/wolfie/test_channel_phase1.php` - 23/23 tests passed (100% success rate)
+- Channel Architecture Phase 2 complete (ChannelController updates)
+  - `getChannelByAgentId($agentId)` - Get channel by agent ID using direct mapping
+  - `switchToAgentChannel($agentId, $createIfNotExists = false)` - Switch to agent's channel
+  - Fixed recursive call bug in `switchChannel()` method
+  - Direct mapping: Agent ID = Channel Number (000-999, maximum 999)
+  - Integration with Channel.php Phase 1 methods
+  - Error handling for invalid agent IDs
+  - Optional channel creation support
+  - Activity logging for agent channel switches
 - 6 operational commands: HELP, COMMANDS, AGENTS, STATUS, CAPTAIN_LOG, PLATFORM_HELP
 
 ## HOW_TO_REACH_OUT
